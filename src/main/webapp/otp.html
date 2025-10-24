@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Verify OTP</h2>
+        <p>An OTP has been sent to your registered phone number (check console for demo).</p>
+        <form id="otpForm">
+            <div class="form-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" id="otp" name="otp" required>
+            </div>
+            <button type="submit" class="btn">Verify</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = sessionStorage.getItem('userEmail');
+            const otp = document.getElementById('otp').value;
+
+            if (!email) {
+                alert('Session expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const body = `email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`;
+
+            try {
+                const response = await fetch('/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Verification successful! Welcome to your dashboard.');
+                    sessionStorage.removeItem('userEmail'); // Clean up
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('Verification failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            }
+        });
+    </script>
+</body>
+</html>

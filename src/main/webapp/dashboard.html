@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 800px;">
+        <h2>Your Financial Dashboard</h2>
+        
+        <nav class="dashboard-nav">
+            <button class="nav-btn" onclick="fetchData('FD')">Fixed Deposits (FD)</button>
+            <button class="nav-btn" onclick="fetchData('RD')">Recurring Deposits (RD)</button>
+            <button class="nav-btn" onclick="fetchData('SIP')">SIPs</button>
+            <button class="nav-btn" onclick="fetchData('Compare')">Compare Products</button>
+        </nav>
+
+        <div id="data-display">
+            <p>Select an option above to view your investments.</p>
+        </div>
+        
+        <a href="/api/logout" style="text-align: center; display: block; margin-top: 1rem;">Logout</a>
+    </div>
+
+    <script>
+        const display = document.getElementById('data-display');
+
+        async function fetchData(type) {
+            let url = '';
+            if (type === 'Compare') {
+                url = '/api/compare'; // API endpoint for comparison data
+            } else {
+                url = `/api/investments?type=${type}`; // API endpoint for user's investments
+            }
+
+            try {
+                display.innerHTML = '<p>Loading...</p>';
+                const response = await fetch(url);
+
+                if (response.status === 401) {
+                    // Handle session timeout or unauthorized access
+                    alert('Session expired. Please log in again.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data.');
+                }
+
+                const data = await response.json();
+                
+                // Format and display the data
+                display.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                display.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
